@@ -11,6 +11,7 @@ const NAME = C.name || "Friend";
 
 document.title = `Happy Birthday ${NAME} 🎂`;
 document.querySelectorAll(".js-name").forEach(el => el.textContent = NAME);
+if (C.birthday) document.querySelectorAll(".js-date").forEach(el => el.textContent = C.birthday);
 
 const $ = s => document.querySelector(s);
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -505,19 +506,6 @@ const Mem = (() => {
       build(arr.map((p, k) => ({ src: p.src, caption: p.caption || defaultCaps[k % (defaultCaps.length || 1)] || "" })));
     })
     .catch(() => {});
-
-  // 2) "Add photos" from the viewer's own gallery (stays on their device)
-  const input = $("#addPhotos");
-  $("#addPhotosBtn").addEventListener("click", () => input.click());
-  input.addEventListener("change", () => {
-    const files = [...input.files].filter(f => f.type.startsWith("image/")).slice(0, 30);
-    if (!files.length) return;
-    const added = files.map(f => ({ src: URL.createObjectURL(f), caption: pick(["A beautiful memory 💖", "Forever in my heart ✨", "Moments like this 🥰", "Us, always 🤍"]) }));
-    const base = list === fallback ? [] : list;
-    build(base.concat(added), base.length);
-    Confetti.burst(innerWidth / 2, innerHeight / 2, 60, .8);
-    input.value = "";
-  });
 
   return { start() { running = true; restart(); }, stop() { running = false; clearInterval(timer); } };
 })();

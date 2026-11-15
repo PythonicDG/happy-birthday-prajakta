@@ -5,7 +5,8 @@
    https://<site>/?name=Rahul&from=Priya
    ============================================================ */
 window.BDAY = {
-  name: "Dipak",
+  name: "Prajakta",
+  birthday: "16 · November",               // shown under the name
   from: "Your favourite person",          // shown at the end of the letter
   whatsappNumber: "",                      // e.g. "919876543210" (country code, no +). Empty = choose contact
 

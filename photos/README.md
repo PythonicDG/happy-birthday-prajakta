@@ -1,6 +1,6 @@
 # 📸 Add photos here
 
-Upload: https://github.com/PythonicDG/happy-birthday-dipak/upload/main/photos
+Upload: https://github.com/PythonicDG/happy-birthday-prajakta/upload/main/photos
 
 - The **file name becomes the caption**: `01 Our first trip.jpg` → "Our first trip"
 - Numbers at the start set the order (01, 02, 03 …)
