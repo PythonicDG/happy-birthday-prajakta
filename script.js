@@ -485,8 +485,20 @@ const Mem = (() => {
 
   // 1) Photos uploaded to the /photos folder on GitHub (list built automatically on every upload)
   const defaultCaps = fallback.map(m => m.caption).filter(Boolean);
+  // backup: if the auto-built list is missing, read the folder straight from GitHub
+  const fromGitHub = () => {
+    const owner = location.hostname.split(".")[0], repo = location.pathname.split("/")[1];
+    if (!location.hostname.endsWith("github.io") || !repo) return [];
+    return fetch(`https://api.github.com/repos/${owner}/${repo}/contents/photos`)
+      .then(r => r.ok ? r.json() : [])
+      .then(files => (Array.isArray(files) ? files : [])
+        .filter(f => /\.(jpe?g|png|webp|gif)$/i.test(f.name))
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+        .map(f => ({ src: "photos/" + encodeURIComponent(f.name), caption: "" })));
+  };
   fetch("photos/photos.json", { cache: "no-store" })
-    .then(r => r.ok ? r.json() : [])
+    .then(r => r.ok ? r.json() : fromGitHub())
+    .then(arr => (Array.isArray(arr) && arr.length) ? arr : fromGitHub())
     .then(arr => {
       if (!Array.isArray(arr) || !arr.length) return;
       arr.forEach(img => { const im = new Image(); im.src = img.src; }); // warm up cache
