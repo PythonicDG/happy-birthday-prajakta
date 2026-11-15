@@ -27,7 +27,11 @@ def caption(stem):
     c = re.sub(r"[_]+", " ", c).strip()
     if re.fullmatch(r"(IMG|DSC|PXL|WhatsApp Image|Screenshot|image|photo)[\w\s.-]*", c, re.I):
         return ""                                  # camera names make bad captions
-    return c
+    if re.search(r"unsplash|pexels|pixabay|freepik", c, re.I):
+        return ""                                  # stock-photo download names
+    if any(len(t) >= 8 and re.search(r"\d", t) and re.search(r"[A-Za-z]", t) for t in re.split(r"[\s-]+", c)):
+        return ""                                  # random ids like mvasDnG41is
+    return c.replace("-", " ").strip()
 
 items = []
 files = sorted([p for p in src_dir.iterdir() if p.is_file() and p.suffix.lower() in EXTS], key=natural) if src_dir.exists() else []
