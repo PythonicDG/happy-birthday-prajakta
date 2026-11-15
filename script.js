@@ -433,20 +433,28 @@ enter["s-cake"] = () => {};
 enter["s-bouquet"] = () => { setTimeout(() => Confetti.rain(60, 2000), 2000); };
 
 /* ---- 6. memories ---- */
+const esc = t => String(t || "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const Mem = (() => {
-  const list = (C.memories || []).filter(Boolean);
   const box = $("#carousel"), dots = $("#dots");
-  let i = 0, timer = null;
-  box.innerHTML = list.map((m, k) => {
-    const bg = m.bg || ["#ff6fb1", "#7b2ff7"];
-    const media = m.src
-      ? `<img src="${m.src}" alt="${(m.caption || "memory").replace(/"/g, "")}" loading="lazy">`
-      : `<div class="art" style="background:linear-gradient(135deg,${bg[0]},${bg[1]})"><span>${m.emoji || "💖"}</span></div>`;
-    return `<figure class="card" data-k="${k}"><div class="tape"></div><div class="ph">${media}</div><figcaption class="cap">${m.caption || ""}</figcaption></figure>`;
-  }).join("");
-  dots.innerHTML = list.map(() => "<i></i>").join("");
-  const cards = [...box.children], n = cards.length;
-  const tilt = cards.map(() => rand(-4, 4));
+  const fallback = (C.memories || []).filter(Boolean);
+  const bgs = fallback.map(m => m.bg).filter(Boolean);
+  let list = fallback.slice(), cards = [], tilt = [], n = 0, i = 0, timer = null, running = false;
+
+  function build(newList, jumpTo = 0) {
+    list = newList.length ? newList : fallback;
+    box.innerHTML = list.map((m, k) => {
+      const bg = m.bg || bgs[k % (bgs.length || 1)] || ["#ff6fb1", "#7b2ff7"];
+      const media = m.src
+        ? `<img src="${esc(m.src)}" alt="${esc(m.caption || "memory")}" ${k > 1 ? 'loading="lazy"' : ""} decoding="async">`
+        : `<div class="art" style="background:linear-gradient(135deg,${bg[0]},${bg[1]})"><span>${m.emoji || "💖"}</span></div>`;
+      return `<figure class="card"><div class="tape"></div><div class="ph">${media}</div><figcaption class="cap">${esc(m.caption)}</figcaption></figure>`;
+    }).join("");
+    dots.innerHTML = list.length > 1 && list.length <= 14 ? list.map(() => "<i></i>").join("") : "";
+    cards = [...box.children]; n = cards.length; tilt = cards.map(() => rand(-4, 4));
+    i = Math.min(jumpTo, n - 1);
+    render();
+    if (running) restart();
+  }
   function render() {
     cards.forEach((c, k) => {
       const off = (k - i + n) % n;
@@ -462,8 +470,8 @@ const Mem = (() => {
     });
     [...dots.children].forEach((d, k) => d.classList.toggle("on", k === i));
   }
-  const go = d => { i = (i + d + n) % n; render(); restart(); };
-  function restart() { clearInterval(timer); timer = setInterval(() => { i = (i + 1) % n; render(); }, 4200); }
+  const go = d => { if (n < 2) return; i = (i + d + n) % n; render(); restart(); };
+  function restart() { clearInterval(timer); if (n > 1) timer = setInterval(() => { i = (i + 1) % n; render(); }, 4200); }
   let sx = null, sy = null;
   box.addEventListener("pointerdown", e => { sx = e.clientX; sy = e.clientY; });
   box.addEventListener("pointerup", e => {
@@ -473,8 +481,33 @@ const Mem = (() => {
     else { const r = box.getBoundingClientRect(); go(e.clientX < r.left + r.width / 2 ? -1 : 1); }
     Audio.blip(660);
   });
-  render();
-  return { start: restart, stop: () => clearInterval(timer) };
+  build(fallback);
+
+  // 1) Photos uploaded to the /photos folder on GitHub (list built automatically on every upload)
+  const defaultCaps = fallback.map(m => m.caption).filter(Boolean);
+  fetch("photos/photos.json", { cache: "no-store" })
+    .then(r => r.ok ? r.json() : [])
+    .then(arr => {
+      if (!Array.isArray(arr) || !arr.length) return;
+      arr.forEach(img => { const im = new Image(); im.src = img.src; }); // warm up cache
+      build(arr.map((p, k) => ({ src: p.src, caption: p.caption || defaultCaps[k % (defaultCaps.length || 1)] || "" })));
+    })
+    .catch(() => {});
+
+  // 2) "Add photos" from the viewer's own gallery (stays on their device)
+  const input = $("#addPhotos");
+  $("#addPhotosBtn").addEventListener("click", () => input.click());
+  input.addEventListener("change", () => {
+    const files = [...input.files].filter(f => f.type.startsWith("image/")).slice(0, 30);
+    if (!files.length) return;
+    const added = files.map(f => ({ src: URL.createObjectURL(f), caption: pick(["A beautiful memory 💖", "Forever in my heart ✨", "Moments like this 🥰", "Us, always 🤍"]) }));
+    const base = list === fallback ? [] : list;
+    build(base.concat(added), base.length);
+    Confetti.burst(innerWidth / 2, innerHeight / 2, 60, .8);
+    input.value = "";
+  });
+
+  return { start() { running = true; restart(); }, stop() { running = false; clearInterval(timer); } };
 })();
 enter["s-memories"] = () => Mem.start();
 

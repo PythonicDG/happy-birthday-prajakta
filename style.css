@@ -207,6 +207,10 @@ body{
 .dots i{width:8px;height:8px;border-radius:9px;background:rgba(255,255,255,.3);transition:all .35s}
 .dots i.on{background:var(--gold);width:22px}
 
+.add-photos{appearance:none;cursor:pointer;font:600 13px var(--sans);color:#fff;padding:9px 16px;border-radius:99px;
+  background:rgba(255,255,255,.1);border:1px dashed rgba(255,255,255,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.add-photos:active{transform:scale(.96)}
+
 /* ---------- letter ---------- */
 .envelope{position:relative;width:min(320px,84vw);aspect-ratio:1.5/1;margin-top:20px;cursor:pointer;transition:transform .8s ease}
 .env-back{position:absolute;inset:0;background:#e9466f;border-radius:8px}
