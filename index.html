@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#1a0b2e">
+<title>Happy Birthday Dipak 🎂</title>
+<meta name="description" content="A little surprise made just for you. Tap to open your gift 🎁">
+<meta property="og:type" content="website">
+<meta property="og:title" content="🎁 A birthday surprise for Dipak!">
+<meta property="og:description" content="Someone made something special for you. Tap to open your gift ✨">
+<meta property="og:image" content="https://pythonicdg.github.io/happy-birthday-dipak/assets/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stars" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<button id="musicBtn" class="icon-btn hidden" aria-label="Toggle music">🔊</button>
+<div id="progress" class="hidden" aria-hidden="true"></div>
+
+<main id="app">
+
+  <!-- 0. Gift -->
+  <section class="scene active" id="s-gift">
+    <p class="kicker fade-up">psst… <span class="js-name">Dipak</span> 👀</p>
+    <h2 class="title fade-up d1">Someone made a surprise for you</h2>
+    <div class="gift" id="gift" role="button" tabindex="0" aria-label="Open your gift">
+      <div class="gift-glow"></div>
+      <div class="gift-lid"><div class="bow"><span></span><span></span></div></div>
+      <div class="gift-box"></div>
+    </div>
+    <p class="hint pulse">Tap the gift to open 🎁</p>
+    <p class="tiny">Turn your sound on 🔊</p>
+  </section>
+
+  <!-- 1. Countdown -->
+  <section class="scene" id="s-count">
+    <div class="count" id="count">3</div>
+  </section>
+
+  <!-- 2. Big wish -->
+  <section class="scene" id="s-wish">
+    <div class="balloon-sky" id="balloonSky" aria-hidden="true"></div>
+    <h1 class="hb" id="hbText" aria-label="Happy Birthday"></h1>
+    <div class="name-script js-name">Dipak</div>
+    <p class="sub reveal" style="--d:2.2s">Today the whole sky is celebrating you ✨</p>
+    <p class="date reveal" style="--d:2.6s">15 · November</p>
+    <button class="btn next reveal" style="--d:3.2s" data-next>Let's celebrate 🎉</button>
+  </section>
+
+  <!-- 3. Cake -->
+  <section class="scene" id="s-cake">
+    <h2 class="title" id="cakeTitle">Blow out the candles 🕯️</h2>
+    <p class="hint" id="cakeHint">Tap each flame to blow it out</p>
+    <div class="cake-wrap">
+      <div class="candles" id="candles"></div>
+      <div class="cake">
+        <div class="tier t3"><div class="drip"></div></div>
+        <div class="tier t2"><div class="drip"></div></div>
+        <div class="tier t1"><div class="drip"></div><div class="cake-name js-name">Dipak</div></div>
+        <div class="plate"></div>
+      </div>
+    </div>
+    <p class="wish-text" id="wishText">Close your eyes &amp; make a wish ✨</p>
+    <button class="btn next hidden" id="cakeNext" data-next>Next 💝</button>
+  </section>
+
+  <!-- 4. Balloons -->
+  <section class="scene" id="s-balloons">
+    <h2 class="title">Pop all the balloons 🎈</h2>
+    <p class="pill" id="popCount">0 / 5 popped</p>
+    <div class="pop-field" id="popField"></div>
+    <p class="sentence" id="sentence"></p>
+    <button class="btn next hidden" id="popNext" data-next>Next 🌹</button>
+  </section>
+
+  <!-- 5. Bouquet -->
+  <section class="scene" id="s-bouquet">
+    <h2 class="title script-title">A bouquet for you 🌹</h2>
+    <div class="bouquet-stage" id="bouquetStage">
+      <svg class="bouquet" id="bouquet" viewBox="0 0 300 360" aria-hidden="true"></svg>
+    </div>
+    <button class="btn next reveal" style="--d:4.5s" data-next>Open our memories 📸</button>
+  </section>
+
+  <!-- 6. Memories -->
+  <section class="scene" id="s-memories">
+    <h2 class="title script-title">Our little memories 📸</h2>
+    <div class="carousel" id="carousel" aria-roledescription="carousel"></div>
+    <div class="dots" id="dots"></div>
+    <p class="hint small">Swipe or tap the sides ←  →</p>
+    <button class="btn next" data-next>One last thing 💌</button>
+  </section>
+
+  <!-- 7. Letter -->
+  <section class="scene" id="s-letter">
+    <h2 class="title script-title" id="letterTitle">You've got a letter 💌</h2>
+    <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open the letter">
+      <div class="env-back"></div>
+      <div class="letter" id="letter"><div class="letter-inner"><p id="letterText"></p><p class="sign" id="letterSign"></p></div></div>
+      <div class="env-front"></div>
+      <div class="env-flap"></div>
+      <div class="seal">❤</div>
+    </div>
+    <p class="hint pulse" id="envHint">Tap to open</p>
+    <button class="btn next hidden" id="letterNext" data-next>Finale 🎆</button>
+  </section>
+
+  <!-- 8. Finale -->
+  <section class="scene" id="s-finale">
+    <div class="finale-card">
+      <p class="kicker">Once again…</p>
+      <h1 class="finale-hb">Happy Birthday</h1>
+      <div class="name-script big js-name">Dipak</div>
+      <p class="sub">May this year bring you endless smiles, big wins &amp; beautiful moments 💖</p>
+      <div class="finale-actions">
+        <button class="btn" id="replayBtn">Replay ↺</button>
+        <a class="btn ghost" id="waBtn" target="_blank" rel="noopener">Say thanks on WhatsApp 💬</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
