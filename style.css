@@ -191,12 +191,29 @@ body{
 @keyframes floaty{from{translate:0 -4px}to{translate:0 6px}}
 
 /* ---------- memories ---------- */
+.carousel-wrap{position:relative}
+.mem-hearts{position:absolute;inset:0;pointer-events:none;z-index:50}
+.mem-hearts i{position:absolute;bottom:10%;font-style:normal;font-size:18px;opacity:0;animation:memRise 5s ease-in infinite}
+.mem-hearts i:nth-child(1){left:-6%;animation-delay:0s}.mem-hearts i:nth-child(2){left:100%;animation-delay:.9s}
+.mem-hearts i:nth-child(3){left:-4%;animation-delay:1.8s}.mem-hearts i:nth-child(4){left:98%;animation-delay:2.7s}
+.mem-hearts i:nth-child(5){left:2%;animation-delay:3.6s}.mem-hearts i:nth-child(6){left:94%;animation-delay:4.4s}
+@keyframes memRise{0%{opacity:0;transform:translateY(0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translateY(-320px) translateX(14px) scale(1.2) rotate(20deg)}}
 .carousel{position:relative;width:min(320px,80vw);aspect-ratio:3/3.8;margin:6px 0 4px;perspective:1200px;touch-action:pan-y}
 .card{position:absolute;inset:0;background:#fff;border-radius:6px;padding:12px 12px 0;box-shadow:0 24px 50px -12px rgba(0,0,0,.7);
   transition:transform .7s cubic-bezier(.2,.8,.2,1), opacity .7s, filter .7s;display:flex;flex-direction:column;will-change:transform}
 .card .ph{flex:1;border-radius:3px;overflow:hidden;position:relative;background:#222}
 .card .ph img{width:100%;height:100%;object-fit:cover;display:block}
-.card.current .ph img,.card.current .ph .art{animation:kenburns 7s ease-out forwards}
+.card .frame{position:absolute;inset:0;overflow:hidden}
+.card .frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.card .frame .lqip{filter:blur(14px) saturate(1.2);transform:scale(1.15)}
+.card .frame .full{opacity:0;transition:opacity .9s ease}
+.card .frame .full.loaded{opacity:1}
+.card.current .frame .full.loaded{animation:develop 1.8s ease-out both}
+@keyframes develop{0%{filter:sepia(.7) brightness(1.5) contrast(.7) blur(3px)}100%{filter:none}}
+.card .frame .shine{position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);background-size:250% 100%;animation:shimmer2 1.4s linear infinite;opacity:0;transition:opacity .4s}
+.card .frame.loading .shine{opacity:1}
+@keyframes shimmer2{from{background-position:150% 0}to{background-position:-100% 0}}
+.card.current .ph .frame,.card.current .ph .art{animation:kenburns 7s ease-out forwards}
 @keyframes kenburns{from{transform:scale(1.15) translate(2%,2%)}to{transform:scale(1) translate(0,0)}}
 .card .art{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(80px,26vw,120px)}
 .card .art::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.35),transparent 50%),radial-gradient(circle at 80% 90%,rgba(0,0,0,.2),transparent 50%)}
@@ -248,3 +265,40 @@ body{
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms !important;animation-iteration-count:1 !important}
 }
+
+/* ---------- extra motion ---------- */
+.scene.active .st{animation:stIn 1s cubic-bezier(.2,.9,.2,1) both;animation-delay:calc(var(--k,0) * .14s + .35s)}
+@keyframes stIn{from{opacity:0;transform:translateY(34px) scale(.94);filter:blur(6px)}to{opacity:1;filter:none}}
+
+#wipe{position:fixed;inset:0;z-index:25;display:none;align-items:center;justify-content:center;pointer-events:none;
+  background:radial-gradient(circle at 50% 45%,#ff7ab8 0%,#c03bff 45%,#3b0f4f 100%)}
+#wipe::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.9) 1px,transparent 1.5px);background-size:34px 34px;opacity:.35;animation:drift 3s linear infinite}
+@keyframes drift{to{background-position:34px 68px}}
+.wipe-heart{font-size:64px;animation:beat .6s ease-in-out infinite alternate;filter:drop-shadow(0 0 24px rgba(255,255,255,.8))}
+.wipe-ring{position:absolute;width:120px;height:120px;border-radius:50%;border:3px solid rgba(255,255,255,.7);animation:ring 1s ease-out infinite}
+@keyframes beat{from{transform:scale(.85)}to{transform:scale(1.15)}}
+@keyframes ring{from{transform:scale(.4);opacity:1}to{transform:scale(2.6);opacity:0}}
+
+.shoot{position:absolute;width:var(--len,120px);height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(255,255,255,0),#fff);
+  transform:rotate(-35deg);transform-origin:right center;filter:drop-shadow(0 0 6px #fff);animation:shoot 1.4s ease-out forwards}
+@keyframes shoot{0%{opacity:0;translate:0 0}15%{opacity:1}100%{opacity:0;translate:-320px 230px}}
+
+.rays{position:absolute;left:50%;top:55%;width:420px;height:420px;border-radius:50%;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(255,211,110,.22) 0 8deg,transparent 8deg 24deg);
+  -webkit-mask:radial-gradient(circle,#000 10%,transparent 68%);mask:radial-gradient(circle,#000 10%,transparent 68%);
+  animation:spin 26s linear infinite;transition:opacity .5s}
+.rays.big{top:50%;width:900px;height:900px;z-index:2;opacity:.8}
+@keyframes spin{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+.gift.open .rays{opacity:0}
+
+@property --ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+.finale-card::before{content:"";position:absolute;inset:-2px;border-radius:30px;padding:2px;pointer-events:none;
+  background:conic-gradient(from var(--ang),#ff5fa2,#ffd36e,#7ee8fa,#b388ff,#ff5fa2);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  animation:angle 4s linear infinite}
+@keyframes angle{to{--ang:360deg}}
+.scene.active .finale-card{animation:stIn 1s cubic-bezier(.2,.9,.2,1) .35s both, floatCard 5s ease-in-out 1.4s infinite alternate}
+@keyframes floatCard{from{translate:0 -6px}to{translate:0 6px}}
+
+.scene.active .cake-wrap.cheer{animation:cheer .9s cubic-bezier(.3,1.6,.5,1)}
+@keyframes cheer{0%{transform:scale(1)}30%{transform:scale(1.08) rotate(-2deg)}60%{transform:scale(.97) rotate(1.5deg)}100%{transform:none}}

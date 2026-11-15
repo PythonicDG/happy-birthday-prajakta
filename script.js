@@ -237,6 +237,12 @@ const Confetti = (() => {
       p.vx *= .985; p.vy = p.vy * .985 + .12; if (p.vy > 4.5) p.vy = 4.5;
       p.x += p.vx + Math.sin(p.tilt) * .6; p.y += p.vy; p.rot += p.vr; p.tilt += p.vt;
       if (p.y > H() + 30) { ps.splice(i, 1); continue; }
+      if (p.spark) {
+        p.life -= .028; if (p.life <= 0) { ps.splice(i, 1); continue; }
+        ctx.save(); ctx.globalAlpha = p.life; ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.color; ctx.font = `${p.h}px serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(p.ch, 0, 0); ctx.restore(); continue;
+      }
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.scale(1, Math.cos(p.tilt));
       ctx.fillStyle = p.color;
       if (p.shape === "circle") { ctx.beginPath(); ctx.arc(0, 0, p.w / 2, 0, 7); ctx.fill(); }
@@ -257,6 +263,13 @@ const Confetti = (() => {
         piece(W() + 10, H() * .85, -rand(6, 15), rand(-16, -8));
       }
     },
+    spark(x, y, n = 10) {
+      for (let k = 0; k < n; k++) {
+        const a = rand(0, 6.28), s = rand(1.5, 4.5);
+        ps.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1.5, w: 0, h: rand(10, 18), rot: rand(-.5, .5), vr: rand(-.1, .1), tilt: 0, vt: 0,
+          color: pick(colors), ch: pick(["✦", "❤", "✧", "★", "•"]), spark: true, life: 1 });
+      }
+    },
     rain(n = 150, spread = 2500) {
       for (let i = 0; i < n; i++) setTimeout(() => piece(rand(0, W()), -20, rand(-1, 1), rand(1, 3)), rand(0, spread));
     }
@@ -270,7 +283,36 @@ const progress = $("#progress");
 progress.innerHTML = order.slice(2).map(() => "<i></i>").join("");
 const enter = {};
 
-function goTo(i) {
+// sparkle burst wherever you tap + magical scene transitions
+let tapX = innerWidth / 2, tapY = innerHeight / 2;
+addEventListener("pointerdown", e => { tapX = e.clientX; tapY = e.clientY; Confetti.spark(e.clientX, e.clientY, 9); }, true);
+const wipe = document.createElement("div");
+wipe.id = "wipe"; wipe.innerHTML = '<span class="wipe-heart">💖</span><span class="wipe-ring"></span>';
+document.body.appendChild(wipe);
+let wipeKind = 0, busy = false;
+function transition(swap) {
+  if (!wipe.animate) return swap();
+  if (busy) return; busy = true;
+  const w = W(), h = H(), x = Math.min(Math.max(tapX, 0), w), y = Math.min(Math.max(tapY, 0), h);
+  const r = Math.hypot(Math.max(x, w - x), Math.max(y, h - y)) + 30;
+  const kinds = [
+    [{ clipPath: `circle(0px at ${x}px ${y}px)` }, { clipPath: `circle(${r}px at ${x}px ${y}px)` }],
+    [{ clipPath: "polygon(0 0,0 0,-40% 100%,-40% 100%)" }, { clipPath: "polygon(0 0,140% 0,100% 100%,-40% 100%)" }],
+    [{ clipPath: "inset(50% 50% 50% 50% round 40px)" }, { clipPath: "inset(0% 0% 0% 0% round 0px)" }]
+  ];
+  const kf = kinds[wipeKind++ % kinds.length];
+  wipe.style.display = "flex";
+  const a = wipe.animate(kf, { duration: 600, easing: "cubic-bezier(.7,0,.25,1)", fill: "forwards" });
+  // timers (not animation events) drive the steps, so it can never get stuck
+  setTimeout(() => {
+    swap();
+    const b = wipe.animate([{ opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(1.15)" }], { duration: 650, delay: 180, easing: "ease", fill: "forwards" });
+    setTimeout(() => { wipe.style.display = "none"; a.cancel(); b.cancel(); busy = false; }, 900);
+  }, 620);
+}
+
+function goTo(i, fancy = true) {
+  if (fancy && i > 2) return transition(() => goTo(i, false));
   const prev = document.getElementById(order[cur]);
   prev.classList.add("leaving");
   prev.classList.remove("active");
@@ -346,6 +388,7 @@ enter["s-wish"] = () => {
       $("#cakeHint").textContent = "Yaay! 🥳";
       setTimeout(() => {
         $("#wishText").classList.add("show");
+        document.querySelector(".cake-wrap").classList.add("cheer");
         $("#cakeTitle").textContent = `Happy Birthday ${NAME}! 🎂`;
         Confetti.cannons(70); FX.show(5, 280);
         setTimeout(() => $("#cakeNext").classList.remove("hidden"), 1200);
@@ -446,12 +489,18 @@ const Mem = (() => {
     box.innerHTML = list.map((m, k) => {
       const bg = m.bg || bgs[k % (bgs.length || 1)] || ["#ff6fb1", "#7b2ff7"];
       const media = m.src
-        ? `<img src="${esc(m.src)}" alt="${esc(m.caption || "memory")}" ${k > 1 ? 'loading="lazy"' : ""} decoding="async">`
+        ? `<div class="frame loading" style="background:linear-gradient(135deg,${bg[0]},${bg[1]})">${m.blur ? `<img class="lqip" src="${m.blur}" alt="">` : ""}<img class="full" src="${esc(m.src)}" alt="${esc(m.caption || "memory")}" decoding="async"><span class="shine"></span></div>`
         : `<div class="art" style="background:linear-gradient(135deg,${bg[0]},${bg[1]})"><span>${m.emoji || "💖"}</span></div>`;
       return `<figure class="card"><div class="tape"></div><div class="ph">${media}</div><figcaption class="cap">${esc(m.caption)}</figcaption></figure>`;
     }).join("");
     dots.innerHTML = list.length > 1 && list.length <= 14 ? list.map(() => "<i></i>").join("") : "";
     cards = [...box.children]; n = cards.length; tilt = cards.map(() => rand(-4, 4));
+    box.querySelectorAll("img.full").forEach(img => {
+      const done = () => { img.closest(".frame").classList.remove("loading"); img.classList.add("loaded"); };
+      let tries = 0;
+      img.addEventListener("error", () => { if (tries++ < 3) setTimeout(() => { img.src = img.src.split("?")[0] + "?r=" + Date.now(); }, 2500 * tries); });
+      if (img.complete && img.naturalWidth) done(); else img.addEventListener("load", done);
+    });
     i = Math.min(jumpTo, n - 1);
     render();
     if (running) restart();
@@ -503,11 +552,20 @@ const Mem = (() => {
     .then(arr => {
       if (!Array.isArray(arr) || !arr.length) return;
       arr.forEach(img => { const im = new Image(); im.src = img.src; }); // warm up cache
-      build(arr.map((p, k) => ({ src: p.src, caption: p.caption || defaultCaps[k % (defaultCaps.length || 1)] || "" })));
+      build(arr.map((p, k) => ({ src: p.src, blur: p.blur, caption: p.caption || defaultCaps[k % (defaultCaps.length || 1)] || "" })));
     })
     .catch(() => {});
 
-  return { start() { running = true; restart(); }, stop() { running = false; clearInterval(timer); } };
+  let dealt = false;
+  function deal() { // cards fly in one by one the first time
+    if (dealt) return; dealt = true;
+    cards.forEach(c => { c.style.transition = "none"; c.style.transform = `translate(${rand(-120, 120)}px,110vh) rotate(${rand(-50, 50)}deg)`; c.style.opacity = 1; });
+    void box.offsetWidth;
+    cards.forEach((c, k) => { const off = (k - i + n) % n; c.style.transition = ""; c.style.transitionDelay = off <= 2 ? `${(2 - off) * .18 + .3}s` : "0s"; c.style.transitionDuration = "1s"; });
+    render();
+    setTimeout(() => cards.forEach(c => { c.style.transitionDelay = ""; c.style.transitionDuration = ""; }), 2000);
+  }
+  return { start() { running = true; deal(); restart(); }, stop() { running = false; clearInterval(timer); } };
 })();
 enter["s-memories"] = () => Mem.start();
 
@@ -523,6 +581,8 @@ enter["s-memories"] = () => Mem.start();
   function open() {
     if (opened) return; opened = true; Mem.stop();
     env.classList.add("open"); $("#envHint").classList.add("hidden"); Audio.blip(988);
+    const er = env.getBoundingClientRect();
+    for (let k = 0; k < 4; k++) setTimeout(() => Confetti.spark(er.left + er.width / 2 + rand(-40, 40), er.top + er.height * .4, 12), k * 180);
     setTimeout(() => {
       scene.classList.add("opened");
       setTimeout(() => {
@@ -553,5 +613,15 @@ enter["s-finale"] = () => {
   $("#waBtn").href = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
   $("#replayBtn").addEventListener("click", () => location.reload());
 })();
+
+/* ---- shooting stars ---- */
+setInterval(() => {
+  if (document.hidden) return;
+  const st = document.createElement("i");
+  st.className = "shoot";
+  st.style.cssText = `left:${rand(10, 100)}%;top:${rand(-5, 35)}%;--len:${rand(80, 160)}px`;
+  $("#stars").appendChild(st);
+  setTimeout(() => st.remove(), 1600);
+}, 3200);
 
 })();

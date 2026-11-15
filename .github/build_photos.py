@@ -3,7 +3,7 @@
 Caption = file name. "01 Our first trip.jpg" -> "Our first trip".
 Photos are shown in file-name order, so start names with 01, 02, ... to set the order.
 """
-import json, re, sys
+import base64, io, json, re, sys
 from pathlib import Path
 from PIL import Image, ImageOps
 
@@ -42,9 +42,16 @@ for n, p in enumerate(files, 1):
             out.write_bytes(p.read_bytes())
         else:
             im = ImageOps.exif_transpose(Image.open(p)).convert("RGB")
-            im.thumbnail((1400, 1400), Image.LANCZOS)
+            big = im.copy(); big.thumbnail((820, 820), Image.LANCZOS)
             out = out_dir / f"{n:03d}.jpg"
-            im.save(out, "JPEG", quality=82, optimize=True, progressive=True)
+            big.save(out, "JPEG", quality=70, optimize=True, progressive=True)
+            # tiny blurred preview, embedded in photos.json so it shows instantly
+            tiny = im.copy(); tiny.thumbnail((28, 28), Image.LANCZOS)
+            buf = io.BytesIO(); tiny.save(buf, "JPEG", quality=60)
+            blur = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+            items.append({"src": f"photos/web/{out.name}", "caption": caption(p.stem), "blur": blur})
+            print(f"ok   {p.name} -> {out.name} ({out.stat().st_size // 1024} KB)")
+            continue
         items.append({"src": f"photos/web/{out.name}", "caption": caption(p.stem)})
         print(f"ok   {p.name} -> {out.name}")
     except Exception as e:

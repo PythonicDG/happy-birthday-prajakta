@@ -34,6 +34,7 @@
     <p class="kicker fade-up">psst… <span class="js-name">Prajakta</span> 👀</p>
     <h2 class="title fade-up d1">Someone made a surprise for you</h2>
     <div class="gift" id="gift" role="button" tabindex="0" aria-label="Open your gift">
+      <div class="rays"></div>
       <div class="gift-glow"></div>
       <div class="gift-lid"><div class="bow"><span></span><span></span></div></div>
       <div class="gift-box"></div>
@@ -59,9 +60,9 @@
 
   <!-- 3. Cake -->
   <section class="scene" id="s-cake">
-    <h2 class="title" id="cakeTitle">Blow out the candles 🕯️</h2>
-    <p class="hint" id="cakeHint">Tap each flame to blow it out</p>
-    <div class="cake-wrap">
+    <h2 class="title st" style="--k:0" id="cakeTitle">Blow out the candles 🕯️</h2>
+    <p class="hint st" style="--k:1" id="cakeHint">Tap each flame to blow it out</p>
+    <div class="cake-wrap st" style="--k:2">
       <div class="candles" id="candles"></div>
       <div class="cake">
         <div class="tier t3"><div class="drip"></div></div>
@@ -76,16 +77,16 @@
 
   <!-- 4. Balloons -->
   <section class="scene" id="s-balloons">
-    <h2 class="title">Pop all the balloons 🎈</h2>
-    <p class="pill" id="popCount">0 / 5 popped</p>
-    <div class="pop-field" id="popField"></div>
+    <h2 class="title st" style="--k:0">Pop all the balloons 🎈</h2>
+    <p class="pill st" style="--k:1" id="popCount">0 / 5 popped</p>
+    <div class="pop-field st" style="--k:2" id="popField"></div>
     <p class="sentence" id="sentence"></p>
     <button class="btn next hidden" id="popNext" data-next>Next 🌹</button>
   </section>
 
   <!-- 5. Bouquet -->
   <section class="scene" id="s-bouquet">
-    <h2 class="title script-title">A bouquet for you 🌹</h2>
+    <h2 class="title script-title st" style="--k:0">A bouquet for you 🌹</h2>
     <div class="bouquet-stage" id="bouquetStage">
       <svg class="bouquet" id="bouquet" viewBox="0 0 300 360" aria-hidden="true"></svg>
     </div>
@@ -94,17 +95,20 @@
 
   <!-- 6. Memories -->
   <section class="scene" id="s-memories">
-    <h2 class="title script-title">Our little memories 📸</h2>
-    <div class="carousel" id="carousel" aria-roledescription="carousel"></div>
-    <div class="dots" id="dots"></div>
-    <p class="hint small">Swipe or tap the sides ←  →</p>
-    <button class="btn next" data-next>One last thing 💌</button>
+    <h2 class="title script-title st" style="--k:0">Our little memories 📸</h2>
+    <div class="carousel-wrap">
+      <div class="carousel" id="carousel" aria-roledescription="carousel"></div>
+      <div class="mem-hearts" aria-hidden="true"><i>💗</i><i>✨</i><i>💕</i><i>💖</i><i>✨</i><i>💞</i></div>
+    </div>
+    <div class="dots st" style="--k:3" id="dots"></div>
+    <p class="hint small st" style="--k:4">Swipe or tap the sides ←  →</p>
+    <button class="btn next reveal" style="--d:1.6s" data-next>One last thing 💌</button>
   </section>
 
   <!-- 7. Letter -->
   <section class="scene" id="s-letter">
-    <h2 class="title script-title" id="letterTitle">You've got a letter 💌</h2>
-    <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open the letter">
+    <h2 class="title script-title st" style="--k:0" id="letterTitle">You've got a letter 💌</h2>
+    <div class="envelope st" style="--k:1" id="envelope" role="button" tabindex="0" aria-label="Open the letter">
       <div class="env-back"></div>
       <div class="letter" id="letter"><div class="letter-inner"><p id="letterText"></p><p class="sign" id="letterSign"></p></div></div>
       <div class="env-front"></div>
@@ -117,6 +121,7 @@
 
   <!-- 8. Finale -->
   <section class="scene" id="s-finale">
+    <div class="rays big"></div>
     <div class="finale-card">
       <p class="kicker">Once again…</p>
       <h1 class="finale-hb">Happy Birthday</h1>
